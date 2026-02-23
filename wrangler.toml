@@ -1,0 +1,15 @@
+name = "binance-futures-frontend"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 站点配置（用于部署静态文件）
+[site]
+bucket = "./dist"  # Vite 构建输出目录
+
+# 函数配置
+[functions]
+directory = "./functions"
+
+# 环境变量（可以在 Cloudflare Dashboard 中配置，或使用 wrangler secret put API_ORIGIN）
+# [vars]
+# API_ORIGIN = "http://43.128.226.215:5000"  # 后端API地址，建议使用环境变量配置

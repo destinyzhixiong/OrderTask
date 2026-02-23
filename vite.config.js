@@ -3,6 +3,11 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  build: {
+    outDir: 'dist',  // 构建输出目录（Cloudflare Workers 需要）
+    assetsDir: 'assets',  // 静态资源目录
+    emptyOutDir: true,  // 构建前清空输出目录
+  },
   server: {
     port: 3000,
     proxy: {
