@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  nginx-1:
+    image: nginx:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./html:/usr/share/nginx/html
+    restart: always
