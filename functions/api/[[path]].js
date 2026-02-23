@@ -18,14 +18,7 @@ export async function onRequest({ request, env, params }) {
   headers.delete("host");
   headers.delete("content-length");
   headers.set("X-Forwarded-Proto", "https");
-  // 只有在 API_ORIGIN 存在时才设置 Host
-  if (env.API_ORIGIN) {
-    try {
-      headers.set("Host", new URL(env.API_ORIGIN).host);
-    } catch (e) {
-      // 如果 URL 解析失败，忽略
-    }
-  }
+  headers.set("Host", new URL(env.API_ORIGIN).host);
 
 
   const body =
