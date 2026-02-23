@@ -1,8 +1,9 @@
 # Cloudflare Pages 配置
 # 注意：如果使用 Cloudflare Pages 自动部署，可能不需要此文件
 # Pages 会自动识别 functions 目录和构建输出目录（dist）
+# wrangler.toml
+name = 'ordertask'
 
-name = "binance-futures-frontend"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
