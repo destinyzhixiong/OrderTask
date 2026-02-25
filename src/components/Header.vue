@@ -33,6 +33,9 @@
               <el-dropdown-item command="change-api-key">
                 <el-icon><Key /></el-icon> 修改API密钥
               </el-dropdown-item>
+              <el-dropdown-item command="change-feishu">
+                <el-icon><Link /></el-icon> 配置飞书通知
+              </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon> 退出登录
               </el-dropdown-item>
@@ -55,17 +58,25 @@
       :current-api-secret="maskedApiSecret"
       @success="handleApiKeyChangeSuccess"
     />
+
+    <!-- 飞书配置弹框 -->
+    <ChangeFeishuDialog
+      v-model="showFeishuDialog"
+      :current-webhook-url="maskedFeishuUrl"
+      @success="handleFeishuChangeSuccess"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Fold, Expand, User, ArrowDown, Lock, Key, SwitchButton } from '@element-plus/icons-vue'
+import { Fold, Expand, User, ArrowDown, Lock, Key, SwitchButton, Link } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '../utils/api'
 import ChangePasswordDialog from './ChangePasswordDialog.vue'
 import ChangeApiKeyDialog from './ChangeApiKeyDialog.vue'
+import ChangeFeishuDialog from './ChangeFeishuDialog.vue'
 
 export default {
   name: 'Header',
@@ -78,7 +89,8 @@ export default {
     Key,
     SwitchButton,
     ChangePasswordDialog,
-    ChangeApiKeyDialog
+    ChangeApiKeyDialog,
+    ChangeFeishuDialog
   },
   setup() {
     const router = useRouter()
@@ -88,8 +100,10 @@ export default {
     const username = ref('用户')
     const showPasswordDialog = ref(false)
     const showApiKeyDialog = ref(false)
+    const showFeishuDialog = ref(false)
     const maskedApiKey = ref('')
     const maskedApiSecret = ref('')
+    const maskedFeishuUrl = ref('')
 
     const collapse = computed(() => sidebarCollapse.value)
 
@@ -105,6 +119,9 @@ export default {
           if (response.data.api_secret) {
             maskedApiSecret.value = response.data.api_secret
           }
+          if (response.data.feishu_webhook_url) {
+            maskedFeishuUrl.value = response.data.feishu_webhook_url
+          }
         }
       } catch (error) {
         console.error('加载用户信息失败:', error)
@@ -117,6 +134,8 @@ export default {
         showPasswordDialog.value = true
       } else if (command === 'change-api-key') {
         showApiKeyDialog.value = true
+      } else if (command === 'change-feishu') {
+        showFeishuDialog.value = true
       } else if (command === 'logout') {
         handleLogout()
       }
@@ -144,6 +163,12 @@ export default {
       ElMessage.success('API密钥修改成功')
     }
 
+    // 飞书配置修改成功
+    const handleFeishuChangeSuccess = () => {
+      loadUserInfo()
+      ElMessage.success('飞书配置更新成功')
+    }
+
     onMounted(() => {
       loadUserInfo()
     })
@@ -153,12 +178,15 @@ export default {
       collapse,
       showPasswordDialog,
       showApiKeyDialog,
+      showFeishuDialog,
       maskedApiKey,
       maskedApiSecret,
+      maskedFeishuUrl,
       toggleSidebar,
       handleCommand,
       handlePasswordChangeSuccess,
-      handleApiKeyChangeSuccess
+      handleApiKeyChangeSuccess,
+      handleFeishuChangeSuccess
     }
   }
 }
