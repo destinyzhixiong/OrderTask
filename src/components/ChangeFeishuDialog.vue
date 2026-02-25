@@ -11,6 +11,15 @@
         <label>当前Webhook URL：</label>
         <span class="masked-url">{{ currentWebhookUrl || '未设置' }}</span>
       </div>
+      <div class="config-item" style="margin-top: 10px;">
+        <label>当前关键词：</label>
+        <span class="keywords-display">
+          <el-tag v-for="(keyword, index) in currentKeywords" :key="index" size="small" style="margin-right: 5px;">
+            {{ keyword }}
+          </el-tag>
+          <span v-if="!currentKeywords || currentKeywords.length === 0" style="color: #909399;">未设置</span>
+        </span>
+      </div>
     </div>
 
     <el-form
@@ -40,11 +49,32 @@
           留空则禁用飞书通知功能
         </div>
       </el-form-item>
+
+      <el-form-item label="自定义关键词" prop="keywords">
+        <el-input
+          v-model="form.keywordsText"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入关键词，每行一个（例如：MCP&#10;交易&#10;通知）"
+          clearable
+        />
+        <div class="form-tip">
+          <el-icon><InfoFilled /></el-icon>
+          每行一个关键词，消息内容必须包含至少一个关键词才能发送成功
+        </div>
+        <div class="form-tip" style="margin-top: 5px;">
+          <el-icon><WarningFilled /></el-icon>
+          如果飞书机器人配置了关键词过滤，必须在此处配置相同的关键词
+        </div>
+      </el-form-item>
     </el-form>
 
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleTest" :loading="testing" type="warning">
+          <el-icon><Promotion /></el-icon> 测试通知
+        </el-button>
         <el-button type="primary" @click="handleSubmit" :loading="submitting">
           确定
         </el-button>
@@ -56,7 +86,7 @@
 <script>
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Link, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
+import { Link, InfoFilled, WarningFilled, Promotion } from '@element-plus/icons-vue'
 import api from '../utils/api'
 
 export default {
@@ -64,7 +94,8 @@ export default {
   components: {
     Link,
     InfoFilled,
-    WarningFilled
+    WarningFilled,
+    Promotion
   },
   props: {
     modelValue: {
@@ -74,16 +105,22 @@ export default {
     currentWebhookUrl: {
       type: String,
       default: ''
+    },
+    currentKeywords: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ['update:modelValue', 'success'],
   setup(props, { emit }) {
     const dialogVisible = ref(false)
     const submitting = ref(false)
+    const testing = ref(false)
     const feishuFormRef = ref(null)
 
     const form = ref({
-      webhookUrl: ''
+      webhookUrl: '',
+      keywordsText: ''
     })
 
     // 验证规则
@@ -128,6 +165,12 @@ export default {
         const response = await api.get('/user/feishu-config')
         if (response.data.success) {
           form.value.webhookUrl = response.data.feishu_webhook_url || ''
+          // 将关键词数组转换为文本（每行一个）
+          if (response.data.feishu_keywords && Array.isArray(response.data.feishu_keywords)) {
+            form.value.keywordsText = response.data.feishu_keywords.join('\n')
+          } else {
+            form.value.keywordsText = ''
+          }
         }
       } catch (error) {
         console.error('加载飞书配置失败:', error)
@@ -137,12 +180,36 @@ export default {
     // 关闭对话框
     const handleClose = () => {
       form.value = {
-        webhookUrl: ''
+        webhookUrl: '',
+        keywordsText: ''
       }
       if (feishuFormRef.value) {
         feishuFormRef.value.clearValidate()
       }
       dialogVisible.value = false
+    }
+
+    // 测试通知
+    const handleTest = async () => {
+      if (!form.value.webhookUrl) {
+        ElMessage.warning('请先配置 Webhook URL')
+        return
+      }
+
+      testing.value = true
+      try {
+        const response = await api.post('/user/feishu-test')
+        if (response.data.success) {
+          ElMessage.success('测试消息已发送，请检查飞书群组')
+        } else {
+          ElMessage.error(response.data.error || '测试失败')
+        }
+      } catch (error) {
+        console.error('测试飞书通知失败:', error)
+        ElMessage.error(error.response?.data?.error || '测试失败，请检查网络连接')
+      } finally {
+        testing.value = false
+      }
     }
 
     // 提交表单
@@ -153,8 +220,15 @@ export default {
         if (valid) {
           submitting.value = true
           try {
+            // 将关键词文本转换为数组（按换行符分割，过滤空行）
+            const keywordsArray = form.value.keywordsText
+              .split('\n')
+              .map(k => k.trim())
+              .filter(k => k.length > 0)
+
             const response = await api.post('/user/feishu-config', {
-              feishu_webhook_url: form.value.webhookUrl
+              feishu_webhook_url: form.value.webhookUrl,
+              feishu_keywords: keywordsArray
             })
 
             if (response.data.success) {
@@ -177,11 +251,13 @@ export default {
     return {
       dialogVisible,
       submitting,
+      testing,
       feishuFormRef,
       form,
       rules,
       handleClose,
-      handleSubmit
+      handleSubmit,
+      handleTest
     }
   }
 }
@@ -211,6 +287,13 @@ export default {
   color: #409eff;
   font-size: 14px;
   word-break: break-all;
+}
+
+.keywords-display {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
 }
 
 .form-tip {

@@ -63,6 +63,7 @@
     <ChangeFeishuDialog
       v-model="showFeishuDialog"
       :current-webhook-url="maskedFeishuUrl"
+      :current-keywords="feishuKeywords"
       @success="handleFeishuChangeSuccess"
     />
   </div>
@@ -104,6 +105,8 @@ export default {
     const maskedApiKey = ref('')
     const maskedApiSecret = ref('')
     const maskedFeishuUrl = ref('')
+    const feishuKeywords = ref([])
+    const maskedFeishuUrl = ref('')
 
     const collapse = computed(() => sidebarCollapse.value)
 
@@ -121,6 +124,9 @@ export default {
           }
           if (response.data.feishu_webhook_url) {
             maskedFeishuUrl.value = response.data.feishu_webhook_url
+          }
+          if (response.data.feishu_keywords && Array.isArray(response.data.feishu_keywords)) {
+            feishuKeywords.value = response.data.feishu_keywords
           }
         }
       } catch (error) {
@@ -182,6 +188,7 @@ export default {
       maskedApiKey,
       maskedApiSecret,
       maskedFeishuUrl,
+      feishuKeywords,
       toggleSidebar,
       handleCommand,
       handlePasswordChangeSuccess,
