@@ -106,7 +106,6 @@ export default {
     const maskedApiSecret = ref('')
     const maskedFeishuUrl = ref('')
     const feishuKeywords = ref([])
-    const maskedFeishuUrl = ref('')
 
     const collapse = computed(() => sidebarCollapse.value)
 
