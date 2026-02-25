@@ -226,6 +226,11 @@ export default {
               .map(k => k.trim())
               .filter(k => k.length > 0)
 
+            console.log('[FEISHU_CONFIG] 发送的数据:', {
+              feishu_webhook_url: form.value.webhookUrl,
+              feishu_keywords: keywordsArray
+            })
+
             const response = await api.post('/user/feishu-config', {
               feishu_webhook_url: form.value.webhookUrl,
               feishu_keywords: keywordsArray
