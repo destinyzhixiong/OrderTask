@@ -208,6 +208,45 @@
                 </div>
               </div>
             </div>
+            
+            <div class="config-subsection">
+              <h4 class="subsection-title">保护机制配置</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input 
+                      type="checkbox" 
+                      v-model="config.enable_real_time_sl"
+                      style="width: auto; margin: 0;"
+                    />
+                    <span>启用实时止损</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 4px;">当亏损回报率超过阈值（默认-50%）时立即平仓</small>
+                </div>
+                <div class="form-group">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input 
+                      type="checkbox" 
+                      v-model="config.enable_price_rise_sl"
+                      style="width: auto; margin: 0;"
+                    />
+                    <span>启用价格上涨止损</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 4px;">当价格上涨超过最大比例（默认20%）时立即平仓</small>
+                </div>
+                <div class="form-group">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input 
+                      type="checkbox" 
+                      v-model="config.enable_limit_order_protect"
+                      style="width: auto; margin: 0;"
+                    />
+                    <span>启用限价单保护机制</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 4px;">监控限价单挂出后的价格变化，价格上涨过快时取消限价单并市价平仓</small>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -543,7 +582,10 @@ export default {
       three_min_loss_limit_roe: 15.0,
       tracking_start_ratio: 0.99,
       immediate_stop_ratio: 0.95,
-      min_volume_15m_usdt: 1000000.0
+      min_volume_15m_usdt: 1000000.0,
+      enable_real_time_sl: false,
+      enable_price_rise_sl: false,
+      enable_limit_order_protect: false
     })
     
     let statusInterval = null
@@ -567,6 +609,9 @@ export default {
             config.value.tracking_start_ratio = response.data.config.tracking_start_ratio ?? config.value.tracking_start_ratio
             config.value.immediate_stop_ratio = response.data.config.immediate_stop_ratio ?? config.value.immediate_stop_ratio
             config.value.min_volume_15m_usdt = response.data.config.min_volume_15m_usdt ?? config.value.min_volume_15m_usdt
+            config.value.enable_real_time_sl = response.data.config.enable_real_time_sl ?? config.value.enable_real_time_sl
+            config.value.enable_price_rise_sl = response.data.config.enable_price_rise_sl ?? config.value.enable_price_rise_sl
+            config.value.enable_limit_order_protect = response.data.config.enable_limit_order_protect ?? config.value.enable_limit_order_protect
             console.log('[DEBUG] 更新后的配置:', config.value)
           }
         }
@@ -600,6 +645,10 @@ export default {
             config.value.three_min_loss_limit_roe = response.data.config.three_min_loss_limit_roe
             config.value.tracking_start_ratio = response.data.config.tracking_start_ratio
             config.value.immediate_stop_ratio = response.data.config.immediate_stop_ratio
+            config.value.min_volume_15m_usdt = response.data.config.min_volume_15m_usdt ?? config.value.min_volume_15m_usdt
+            config.value.enable_real_time_sl = response.data.config.enable_real_time_sl ?? config.value.enable_real_time_sl
+            config.value.enable_price_rise_sl = response.data.config.enable_price_rise_sl ?? config.value.enable_price_rise_sl
+            config.value.enable_limit_order_protect = response.data.config.enable_limit_order_protect ?? config.value.enable_limit_order_protect
             // 保留is_running字段（如果存在）
             if (response.data.config.is_running !== undefined) {
               // is_running 不在config中，不需要更新
