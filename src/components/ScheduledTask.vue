@@ -91,37 +91,7 @@
                 />
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>动态止损阈值</label>
-                <input 
-                  type="number" 
-                  v-model.number="config.dynamic_stop_threshold" 
-                  class="form-input"
-                  step="0.001"
-                  min="0"
-                />
-                <small style="color: #666; display: block; margin-top: 4px;">保留字段（暂未使用）</small>
-              </div>
-            </div>
-            
-            <!-- 止盈止损配置 -->
-            <div class="config-subsection">
-              <h4 class="subsection-title">实时止盈配置</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>回报率阈值（%）</label>
-                  <input 
-                    type="number" 
-                    v-model.number="config.real_time_tp_roe" 
-                    class="form-input"
-                    step="0.1"
-                    min="0"
-                  />
-                  <small style="color: #666; display: block; margin-top: 4px;">回报率 > 此值时立即止盈</small>
-                </div>
-              </div>
-            </div>
+            <!-- 以下参数为兼容旧版本保留字段，当前策略不再直接使用，前端不展示配置项，以免干扰理解 -->
             
             <div class="config-subsection">
               <h4 class="subsection-title">3分钟判断配置</h4>
@@ -147,17 +117,6 @@
                     min="0"
                   />
                   <small style="color: #666; display: block; margin-top: 4px;">亏损回报率 ≤ 此值时立即止亏</small>
-                </div>
-                <div class="form-group">
-                  <label>亏损挂单阈值（%）</label>
-                  <input 
-                    type="number" 
-                    v-model.number="config.three_min_loss_limit_roe" 
-                    class="form-input"
-                    step="0.1"
-                    min="0"
-                  />
-                  <small style="color: #666; display: block; margin-top: 4px;">亏损回报率 > 此值时，挂限价单平仓，限价单价格 = 开仓价（不亏损平仓）</small>
                 </div>
               </div>
             </div>
